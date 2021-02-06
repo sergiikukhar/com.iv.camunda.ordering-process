@@ -1,0 +1,281 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" id="Definitions_1" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="4.4.0">
+  <bpmn:collaboration id="x">
+    <bpmn:participant id="ordering-process-pool" name="Ordering process" processRef="ordering-process" />
+  </bpmn:collaboration>
+  <bpmn:process id="ordering-process" name="ordering-process" isExecutable="true">
+    <bpmn:laneSet id="LaneSet_1ryr096">
+      <bpmn:lane id="Lane_0a7a69d">
+        <bpmn:flowNodeRef>start_event</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gateway_0kywniw</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>human_task_make_order</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>timer_event_wait_some_time_for_response</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>service_task_send_order_to_delivery_service_1</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>end_event_order_cancelled</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>end_event</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>human_task_receive_an_order</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>message_catch_event_order_send_2</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>message_catch_event_order_send_1</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>service_task_send_order_to_delivery_service_2</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>event_subprocess_delivery_service_simulation</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Gateway_0q6bvud</bpmn:flowNodeRef>
+      </bpmn:lane>
+    </bpmn:laneSet>
+    <bpmn:startEvent id="start_event">
+      <bpmn:outgoing>Flow_098z81k</bpmn:outgoing>
+    </bpmn:startEvent>
+    <bpmn:intermediateCatchEvent id="timer_event_wait_some_time_for_response" name="Wait some time for response">
+      <bpmn:incoming>Flow_0uhjg62</bpmn:incoming>
+      <bpmn:outgoing>Flow_0mxwyra</bpmn:outgoing>
+      <bpmn:timerEventDefinition id="TimerEventDefinition_12srj6k">
+        <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">PT3M</bpmn:timeDuration>
+      </bpmn:timerEventDefinition>
+    </bpmn:intermediateCatchEvent>
+    <bpmn:intermediateCatchEvent id="message_catch_event_order_send_2" name="Receive response from delivery service">
+      <bpmn:incoming>Flow_1yik5je</bpmn:incoming>
+      <bpmn:outgoing>Flow_1m5vb0e</bpmn:outgoing>
+      <bpmn:messageEventDefinition id="MessageEventDefinition_1yko6d9" messageRef="Message_0ec71zk" />
+    </bpmn:intermediateCatchEvent>
+    <bpmn:exclusiveGateway id="Gateway_0kywniw" default="Flow_1hu3nsh">
+      <bpmn:incoming>Flow_1m5vb0e</bpmn:incoming>
+      <bpmn:incoming>Flow_0y203ng</bpmn:incoming>
+      <bpmn:outgoing>Flow_1be20va</bpmn:outgoing>
+      <bpmn:outgoing>Flow_1hu3nsh</bpmn:outgoing>
+    </bpmn:exclusiveGateway>
+    <bpmn:sequenceFlow id="Flow_098z81k" sourceRef="start_event" targetRef="human_task_make_order" />
+    <bpmn:sequenceFlow id="Flow_145m64w" sourceRef="human_task_make_order" targetRef="service_task_send_order_to_delivery_service_1" />
+    <bpmn:sequenceFlow id="Flow_1x2u7do" sourceRef="service_task_send_order_to_delivery_service_1" targetRef="Gateway_0q6bvud" />
+    <bpmn:sequenceFlow id="Flow_1vc3mor" sourceRef="Gateway_0q6bvud" targetRef="message_catch_event_order_send_1" />
+    <bpmn:sequenceFlow id="Flow_0uhjg62" sourceRef="Gateway_0q6bvud" targetRef="timer_event_wait_some_time_for_response" />
+    <bpmn:sequenceFlow id="Flow_0mxwyra" sourceRef="timer_event_wait_some_time_for_response" targetRef="service_task_send_order_to_delivery_service_2" />
+    <bpmn:sequenceFlow id="Flow_1yik5je" sourceRef="service_task_send_order_to_delivery_service_2" targetRef="message_catch_event_order_send_2" />
+    <bpmn:sequenceFlow id="Flow_1m5vb0e" sourceRef="message_catch_event_order_send_2" targetRef="Gateway_0kywniw" />
+    <bpmn:sequenceFlow id="Flow_0y203ng" sourceRef="message_catch_event_order_send_1" targetRef="Gateway_0kywniw" />
+    <bpmn:sequenceFlow id="Flow_1be20va" name="Order sent" sourceRef="Gateway_0kywniw" targetRef="human_task_receive_an_order">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${ orderConfirmed }</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_08oi2jj" sourceRef="human_task_receive_an_order" targetRef="end_event" />
+    <bpmn:userTask id="human_task_make_order" name="Make order">
+      <bpmn:extensionElements>
+        <camunda:formData>
+          <camunda:formField id="item_1" label="Item 1" type="boolean" />
+          <camunda:formField id="item_2" label="Item 2" type="boolean" />
+          <camunda:formField id="item_3" label="Item 3" type="boolean" />
+        </camunda:formData>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_098z81k</bpmn:incoming>
+      <bpmn:outgoing>Flow_145m64w</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:serviceTask id="service_task_send_order_to_delivery_service_1" name="Send order to delivery service" camunda:delegateExpression="${ sendOrderToDeliveryService }">
+      <bpmn:incoming>Flow_145m64w</bpmn:incoming>
+      <bpmn:outgoing>Flow_1x2u7do</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="Flow_1hu3nsh" sourceRef="Gateway_0kywniw" targetRef="end_event_order_cancelled" />
+    <bpmn:endEvent id="end_event_order_cancelled" name="Order cancelled">
+      <bpmn:incoming>Flow_1hu3nsh</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:endEvent id="end_event">
+      <bpmn:incoming>Flow_08oi2jj</bpmn:incoming>
+    </bpmn:endEvent>
+    <bpmn:userTask id="human_task_receive_an_order" name="Receive an order">
+      <bpmn:extensionElements>
+        <camunda:formData>
+          <camunda:formField id="orderReceived" label="Order received" type="boolean" />
+        </camunda:formData>
+      </bpmn:extensionElements>
+      <bpmn:incoming>Flow_1be20va</bpmn:incoming>
+      <bpmn:outgoing>Flow_08oi2jj</bpmn:outgoing>
+    </bpmn:userTask>
+    <bpmn:intermediateCatchEvent id="message_catch_event_order_send_1" name="Receive response from delivery service">
+      <bpmn:incoming>Flow_1vc3mor</bpmn:incoming>
+      <bpmn:outgoing>Flow_0y203ng</bpmn:outgoing>
+      <bpmn:messageEventDefinition id="MessageEventDefinition_1hk5jfr" messageRef="Message_17c8x5i" />
+    </bpmn:intermediateCatchEvent>
+    <bpmn:serviceTask id="service_task_send_order_to_delivery_service_2" name="Resend request for order to delivery dervice" camunda:delegateExpression="${ sendOrderToDeliveryService }">
+      <bpmn:incoming>Flow_0mxwyra</bpmn:incoming>
+      <bpmn:outgoing>Flow_1yik5je</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:subProcess id="event_subprocess_delivery_service_simulation" name="Delivery service simulation" triggeredByEvent="true">
+      <bpmn:userTask id="human_task_check_the_availability_of_the_order" name="Check the availability of the order">
+        <bpmn:extensionElements>
+          <camunda:formData>
+            <camunda:formField id="orderConfirmed" label="Confirm order" type="boolean" />
+          </camunda:formData>
+          <camunda:executionListener event="start">
+            <camunda:script scriptFormat="JavaScript">execution.setVariable('orderSent', false);</camunda:script>
+          </camunda:executionListener>
+        </bpmn:extensionElements>
+        <bpmn:incoming>Flow_18ephl3</bpmn:incoming>
+        <bpmn:outgoing>Flow_1mmcrtx</bpmn:outgoing>
+      </bpmn:userTask>
+      <bpmn:startEvent id="conditional_start_event" isInterrupting="false">
+        <bpmn:outgoing>Flow_18ephl3</bpmn:outgoing>
+        <bpmn:conditionalEventDefinition id="ConditionalEventDefinition_03uht8z">
+          <bpmn:condition xsi:type="bpmn:tFormalExpression">${ orderSent }</bpmn:condition>
+        </bpmn:conditionalEventDefinition>
+      </bpmn:startEvent>
+      <bpmn:sequenceFlow id="Flow_18ephl3" sourceRef="conditional_start_event" targetRef="human_task_check_the_availability_of_the_order" />
+      <bpmn:endEvent id="end_event_delivery_service_simulation">
+        <bpmn:incoming>Flow_1cr98bf</bpmn:incoming>
+      </bpmn:endEvent>
+      <bpmn:sequenceFlow id="Flow_1mmcrtx" sourceRef="human_task_check_the_availability_of_the_order" targetRef="message_throw_event_send_result1" />
+      <bpmn:sequenceFlow id="Flow_1cr98bf" sourceRef="message_throw_event_send_result1" targetRef="end_event_delivery_service_simulation" />
+      <bpmn:intermediateThrowEvent id="message_throw_event_send_result1" name="Send result">
+        <bpmn:incoming>Flow_1mmcrtx</bpmn:incoming>
+        <bpmn:outgoing>Flow_1cr98bf</bpmn:outgoing>
+        <bpmn:messageEventDefinition id="MessageEventDefinition_003lr24" camunda:expression="${messageCorrelateService.correlate(execution, &#39;msg_delivery_service_response&#39;)}" />
+      </bpmn:intermediateThrowEvent>
+    </bpmn:subProcess>
+    <bpmn:eventBasedGateway id="Gateway_0q6bvud">
+      <bpmn:incoming>Flow_1x2u7do</bpmn:incoming>
+      <bpmn:outgoing>Flow_1vc3mor</bpmn:outgoing>
+      <bpmn:outgoing>Flow_0uhjg62</bpmn:outgoing>
+    </bpmn:eventBasedGateway>
+  </bpmn:process>
+  <bpmn:error id="Error_05dosuy" name="escape" errorCode="escape" />
+  <bpmn:message id="Message_17c8x5i" name="msg_delivery_service_response" />
+  <bpmn:message id="Message_0ec71zk" name="msg_delivery_service_response" />
+  <bpmn:message id="Message_1h7pz5o" />
+  <bpmn:message id="Message_01bonaf" name="msg_delivery_service_response" />
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="x">
+      <bpmndi:BPMNShape id="Participant_0vq66bt_di" bpmnElement="ordering-process-pool" isHorizontal="true">
+        <dc:Bounds x="160" y="80" width="1530" height="680" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_0a7a69d_di" bpmnElement="Lane_0a7a69d" isHorizontal="true">
+        <dc:Bounds x="190" y="80" width="1500" height="680" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_098z81k_di" bpmnElement="Flow_098z81k">
+        <di:waypoint x="308" y="230" />
+        <di:waypoint x="360" y="230" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_145m64w_di" bpmnElement="Flow_145m64w">
+        <di:waypoint x="460" y="230" />
+        <di:waypoint x="520" y="230" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1x2u7do_di" bpmnElement="Flow_1x2u7do">
+        <di:waypoint x="620" y="230" />
+        <di:waypoint x="685" y="230" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1vc3mor_di" bpmnElement="Flow_1vc3mor">
+        <di:waypoint x="735" y="230" />
+        <di:waypoint x="802" y="230" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0uhjg62_di" bpmnElement="Flow_0uhjg62">
+        <di:waypoint x="710" y="255" />
+        <di:waypoint x="710" y="340" />
+        <di:waypoint x="802" y="340" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0mxwyra_di" bpmnElement="Flow_0mxwyra">
+        <di:waypoint x="838" y="340" />
+        <di:waypoint x="910" y="340" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1yik5je_di" bpmnElement="Flow_1yik5je">
+        <di:waypoint x="1010" y="340" />
+        <di:waypoint x="1082" y="340" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1m5vb0e_di" bpmnElement="Flow_1m5vb0e">
+        <di:waypoint x="1118" y="340" />
+        <di:waypoint x="1200" y="340" />
+        <di:waypoint x="1200" y="255" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0y203ng_di" bpmnElement="Flow_0y203ng">
+        <di:waypoint x="838" y="230" />
+        <di:waypoint x="1175" y="230" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1be20va_di" bpmnElement="Flow_1be20va">
+        <di:waypoint x="1225" y="230" />
+        <di:waypoint x="1350" y="230" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1261" y="212" width="53" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_08oi2jj_di" bpmnElement="Flow_08oi2jj">
+        <di:waypoint x="1450" y="230" />
+        <di:waypoint x="1512" y="230" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1hu3nsh_di" bpmnElement="Flow_1hu3nsh">
+        <di:waypoint x="1200" y="205" />
+        <di:waypoint x="1200" y="148" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Event_0v2xq69_di" bpmnElement="start_event">
+        <dc:Bounds x="272" y="212" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1k2supi_di" bpmnElement="timer_event_wait_some_time_for_response">
+        <dc:Bounds x="802" y="322" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="783" y="365" width="75" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0zbrd6f_di" bpmnElement="message_catch_event_order_send_2">
+        <dc:Bounds x="1082" y="322" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1056" y="365" width="89" height="40" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_0kywniw_di" bpmnElement="Gateway_0kywniw" isMarkerVisible="true">
+        <dc:Bounds x="1175" y="205" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1tozdk9_di" bpmnElement="human_task_make_order">
+        <dc:Bounds x="360" y="190" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0wareoy_di" bpmnElement="service_task_send_order_to_delivery_service_1">
+        <dc:Bounds x="520" y="190" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_14r6ite_di" bpmnElement="end_event_order_cancelled">
+        <dc:Bounds x="1182" y="112" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="1241" y="123" width="78" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1odq4k9_di" bpmnElement="end_event">
+        <dc:Bounds x="1512" y="212" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0arcnpo_di" bpmnElement="human_task_receive_an_order">
+        <dc:Bounds x="1350" y="190" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1i5c531_di" bpmnElement="message_catch_event_order_send_1">
+        <dc:Bounds x="802" y="212" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="776" y="160" width="89" height="40" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0izhl32_di" bpmnElement="service_task_send_order_to_delivery_service_2">
+        <dc:Bounds x="910" y="300" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Gateway_0g8ciso_di" bpmnElement="Gateway_0q6bvud">
+        <dc:Bounds x="685" y="205" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1pj0eel_di" bpmnElement="event_subprocess_delivery_service_simulation" isExpanded="true">
+        <dc:Bounds x="680" y="530" width="450" height="190" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="Flow_18ephl3_di" bpmnElement="Flow_18ephl3">
+        <di:waypoint x="756" y="630" />
+        <di:waypoint x="800" y="630" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1mmcrtx_di" bpmnElement="Flow_1mmcrtx">
+        <di:waypoint x="900" y="630" />
+        <di:waypoint x="962" y="630" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_1cr98bf_di" bpmnElement="Flow_1cr98bf">
+        <di:waypoint x="998" y="630" />
+        <di:waypoint x="1052" y="630" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Event_1xm1lsh_di" bpmnElement="conditional_start_event">
+        <dc:Bounds x="720" y="612" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1p5mo6m_di" bpmnElement="end_event_delivery_service_simulation">
+        <dc:Bounds x="1052" y="612" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_07h6lbf_di" bpmnElement="human_task_check_the_availability_of_the_order">
+        <dc:Bounds x="800" y="590" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_09kjj87_di" bpmnElement="message_throw_event_send_result1">
+        <dc:Bounds x="962" y="612" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="952" y="655" width="57" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>
